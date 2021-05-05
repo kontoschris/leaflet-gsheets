@@ -1,3 +1,6 @@
+/*
+Μπορείτε να βρείτε τα σημεία του κώδικα που έχω αλλάξει, αναζητώντας το string: Ερώτημα 4
+
 /* global L Papa */
 
 /*
@@ -8,6 +11,7 @@
 // PASTE YOUR URLs HERE
 // these URLs come from Google Sheets 'shareable link' form
 // the first is the geometry layer and the second the points
+//Ερώτημα 4: Τα google sheets που χρησιμοποίησα
 let geomURL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaVc4dqJJbKk8L_3r_SMLOqJWjQJATWKKhEPIQLtX6G4fNHY0Rt9RPJzq6fzDGHAzdRFxSMSMdSxRj/pub?output=csv ";
 let pointsURL =
@@ -18,6 +22,7 @@ window.addEventListener("DOMContentLoaded", init);
 let map;
 let sidebar;
 let panelID = "my-info-panel";
+let popup; //Ερώτημα 4: Προστέθηκε η μεταβλητη popup για την εμφάνιση του popup
 
 /*
  * init() is called when the page has loaded
@@ -53,9 +58,13 @@ function init() {
   };
   sidebar.addPanel(panelContent);
 
-  map.on("click", function () {
-    sidebar.close(panelID);
-  });
+  popup = L.popup();
+
+  //Ερώτημα 4: αλ΄λάχθηκε ο κώδικας του onclick - τώρα καλεί την συνάρτηση onMapClick (βλ. παρακάτω)
+  map.on("click", onMapClick);
+  // map.on("click", function () {
+  //   sidebar.close(panelID);
+  // });
 
   // Use PapaParse to load data from Google Sheets
   // And call the respective functions to add those to the map.
@@ -69,6 +78,16 @@ function init() {
     header: true,
     complete: addPoints,
   });
+}
+
+//Ερώτημα 4: Συνάρτηση που καλείτε κάθε φορά για το OnClick στον χάρτη
+function onMapClick(e) {
+  sidebar.close(panelID);
+  popup
+    .setLatLng(e.latlng)
+    .setContent("Τρέχουσα θέση: " + e.latlng.toString())
+
+    .openOn(map);
 }
 
 /*
@@ -174,6 +193,7 @@ function addPoints(data) {
       properties: {
         name: data[row].name,
         description: data[row].description,
+        lat: data[row].lat,
       },
     };
     marker.on({
@@ -183,6 +203,7 @@ function addPoints(data) {
           e.target.feature.properties.name;
         document.getElementById("sidebar-content").innerHTML =
           e.target.feature.properties.description;
+
         sidebar.open(panelID);
       },
     });
@@ -196,8 +217,18 @@ function addPoints(data) {
       prefix: "fa",
       extraClasses: "fa-rotate-0",
     });
+
+    //Ερώτημα 4: το δικό μου εικονίδιο
+    let myIcon = L.icon({
+      iconUrl: "mymarker.png",
+      iconSize: [35, 53], // size of the icon
+      //iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+      popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
+    });
+
     if (!markerType.includes("circle")) {
-      marker.setIcon(icon);
+      //marker.setIcon(icon);
+      marker.setIcon(myIcon); //Ερώτημα 4: βάζω το δικό μου εικονίδιο
     }
   }
 }
